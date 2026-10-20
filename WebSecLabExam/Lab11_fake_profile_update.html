@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Lab11 - Fake Profile Update</title>
+</head>
+<body>
+
+<h1>Fake Profile Update</h1>
+
+<p>
+    This page simulates an external site sending a forged POST request
+    while the victim has an active session.
+</p>
+
+<h2>Test A: Before CSRF Protection</h2>
+
+<!-- Forged POST ไปยัง endpoint ที่ไม่มี CSRF Protection -->
+<form method="post"
+      action="http://localhost:8080/Lab11/Lab11_update_profile_before_csrf.php">
+    <input type="hidden" name="display_name" value="Changed by Fake Request">
+    <input type="hidden" name="email" value="fake-request@example.com">
+    <button type="submit">Send Fake Update (Before CSRF)</button>
+</form>
+
+<hr>
+
+<h2>Test B: After CSRF Protection</h2>
+
+<!-- ไม่มี csrf_token ดังนั้น Secure Endpoint ต้องตอบ 403 -->
+<form method="post"
+      action="http://localhost:8080/Lab11/Lab11_update_profile.php">
+    <input type="hidden" name="display_name" value="Should Not Be Updated">
+    <input type="hidden" name="email" value="blocked@example.com">
+    <button type="submit">Send Fake Update (After CSRF)</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,137 @@
+# lab-isolated (internal:true): runner only — student code cannot egress to internet
+# lab-pub: grader / web / pma / db host ports — students may access grader on LAN
+networks:
+  lab-isolated:
+    internal: true
+  lab-pub:
+
+services:
+  db:
+    image: mariadb:11.4
+    container_name: labexam-db
+    environment:
+      MYSQL_ROOT_PASSWORD: RootPass1234
+      MYSQL_DATABASE: db_labexam
+    volumes:
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - labexam-db-data:/var/lib/mysql
+    ports:
+      - "0.0.0.0:3307:3306"
+    networks:
+      - lab-isolated
+      - lab-pub
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build: ./php
+    container_name: labexam-web
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "0.0.0.0:8080:80"
+    volumes:
+      - ./php/www:/var/www/html
+      - ./php/uploads_secure:/var/www/uploads_secure
+    environment:
+      DB_HOST: db
+      DB_NAME: db_labexam
+      DB_USER: root
+      DB_PASS: RootPass1234
+    networks:
+      - lab-isolated
+      - lab-pub
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: labexam-pma
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: RootPass1234
+    ports:
+      - "0.0.0.0:8081:80"
+    networks:
+      - lab-isolated
+      - lab-pub
+
+  # Runs student ZIP during grade — locked: no host ports, no internet
+  runner:
+    build: ./php/runner
+    container_name: labexam-runner
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - grader-data:/var/www/data
+    environment:
+      DB_HOST: db
+    networks:
+      - lab-isolated
+
+  grader:
+    build: ./grader
+    container_name: labexam-grader
+    depends_on:
+      db:
+        condition: service_healthy
+      web:
+        condition: service_started
+      runner:
+        condition: service_started
+    ports:
+      - "0.0.0.0:3000:3000"
+    volumes:
+      - ./php/www:/starter:ro
+      - ./docs:/docs:ro
+      - ./mysql/schema_body.sql:/schema/schema_body.sql:ro
+      - ./student-pack:/student-pack:ro
+      - grader-data:/app/data
+    environment:
+      STARTER_DIR: /starter
+      DOCS_DIR: /docs
+      STUDENT_PACK_DIR: /student-pack
+      DATA_DIR: /app/data
+      SCHEMA_FILE: /schema/schema_body.sql
+      WEB_BASE_URL: http://web
+      RUNNER_HOST: runner
+      RUNNER_PORT: "80"
+      DB_HOST: db
+      DB_ROOT_PASSWORD: RootPass1234
+      SESSION_SECRET: labexam-session-change-in-class
+      RESET_KEY: labexam-reset
+      NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+    networks:
+      - lab-isolated
+      - lab-pub
+
+  # Public HTTPS tunnel → grader :3000 (token from lab-exam/.env)
+  # Inspector: http://127.0.0.1:4040  |  public URL: docker compose logs ngrok
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: labexam-ngrok
+    restart: unless-stopped
+    command:
+      - "http"
+      - "grader:3000"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    ports:
+      - "4040:4040"
+    depends_on:
+      - grader
+    networks:
+      - lab-pub
+
+volumes:
+  labexam-db-data:
+  grader-data:

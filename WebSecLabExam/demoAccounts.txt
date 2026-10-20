@@ -1,0 +1,16 @@
+$demoAccounts = [
+    'student01' => [
+        'role' => 'user',
+        'password_hash' => '$2y$12$.JJKqDNE5/H0lCSPVCEMherUXkgHJnVFkolZJiro8dGWVlvjUx.Ie',
+    ],
+    'student02' => [
+        'role' => 'user',
+        'password_hash' => '$2y$12$BVsHtWGFEJ.KgNu5Ir0oUeWvkcrBGgEmJSbxgKFg2GI9uPWn0CmM2',
+    ],
+    'admin01' => [
+        'role' => 'admin',
+        'password_hash' => '$2y$12$4i.eMAkXh39Roc0U5wPEkOjGam4Dk/STVVStGwHj08M1hAFLAlBMi',
+    ],
+];
+
+

@@ -1,0 +1,44 @@
+# Local practice stack — same shape as exam (MariaDB + PHP)
+# Usage (from this folder, after unzip):
+#   docker compose up --build -d
+# Open http://127.0.0.1:8080
+# Demo: resident01 / Resident1234 · admin01 / Admin1234
+#
+# Reads DB_NAME / DB_USER / DB_PASS from ./.env (Compose variable substitution).
+# db.sql is applied automatically on first DB start (empty volume only).
+
+services:
+  db:
+    image: mariadb:11.4
+    environment:
+      MYSQL_ROOT_PASSWORD: RootPass1234
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    volumes:
+      - ./db.sql:/docker-entrypoint-initdb.d/01-db.sql:ro
+      - student_db_data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3307:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./www:/var/www/html
+      - ./.env:/var/www/html/.env:ro
+      - ./uploads_secure:/var/www/uploads_secure
+    environment:
+      DB_HOST: db
+
+volumes:
+  student_db_data:

@@ -1,0 +1,9 @@
+.env
+*.env.local
+grader/node_modules/
+grader/.next/
+grader/data/
+php/uploads_insecure/*
+!php/uploads_insecure/.gitkeep
+php/uploads_secure/*
+!php/uploads_secure/.gitkeep

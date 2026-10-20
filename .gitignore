@@ -1,0 +1,57 @@
+# Secrets / local env
+.env
+.env.*
+!.env.example
+*.env.local
+lab-exam/.env
+
+# Dependencies & build
+node_modules/
+lab-exam/grader/node_modules/
+lab-exam/grader/.next/
+lab-exam/grader/out/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs & OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.cursor/
+
+# Docker / runtime data
+**/uploads_insecure/*
+!**/uploads_insecure/.gitkeep
+**/uploads_secure/*
+!**/uploads_secure/.gitkeep
+lab-exam/grader/data/
+**/submissions/
+
+# Archives & bulky dumps
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Python / temp test artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+/tmp/
+
+# Coverage / misc
+coverage/
+.nyc_output/
+*.pem
+*.key
